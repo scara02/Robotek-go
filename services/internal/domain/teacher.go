@@ -7,13 +7,3 @@ type Teacher struct {
 	Password    string
 	PhoneNumber string
 }
-
-func NewTeacher(id int, fullName, email, password, phoneNumber string) Teacher {
-	return Teacher{
-		ID:          id,
-		FullName:    fullName,
-		Email: email,
-		Password: password,
-		PhoneNumber: phoneNumber,
-	}
-}
