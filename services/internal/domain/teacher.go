@@ -1,9 +1,9 @@
 package domain
 
 type Teacher struct {
-	ID          int
-	FullName    string
-	Email       string
-	Password    string
-	PhoneNumber string
+	ID          int    `json:"id"`
+	FullName    string `json:"fullName"`
+	Email       string `json:"email"`
+	Password    string `json:"password"`
+	PhoneNumber string `json:"phoneNumber"`
 }

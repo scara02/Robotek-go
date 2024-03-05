@@ -2,9 +2,12 @@ package main
 
 import (
 	"log"
-	// "net/http"
+	"net/http"
 
 	"go-web-robotek/pkg/store/postgres"
+	"go-web-robotek/services/internal/delivery"
+	"go-web-robotek/services/internal/repository"
+	"go-web-robotek/services/internal/usecase"
 )
 
 func main() {
@@ -16,19 +19,17 @@ func main() {
 
 	defer db.Close()
 
-	sqlStatement := `
-INSERT INTO teachers (fullName, email, password, phoneNumber)
-VALUES ($1, $2, $3, $4)`
-	_, err = db.Exec(sqlStatement, "test test", "test@edu.kz", "test", "123123")
-	if err != nil {
-		panic(err)
-	}
+	teacherRepo := repository.NewTeacherRepo(db)
+	teacherUseCase := usecase.NewTeacherUsecase(*teacherRepo)
+	teacherDelivery := delivery.NewTeacherDelivery(teacherUseCase)
 
-	// mux := http.NewServeMux()
+	mux := http.NewServeMux()
 
-	// log.Print("starting server on :4000")
+	mux.HandleFunc("/teachers/create", teacherDelivery.CreateHandler)
 
-	// err = http.ListenAndServe(":4000", mux)
-	// log.Fatal(err)
+	log.Print("starting server on :4000")
+	
+	err = http.ListenAndServe(":4000", mux)
+	log.Fatal(err)
 
 }
