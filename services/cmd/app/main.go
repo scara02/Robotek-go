@@ -33,13 +33,18 @@ func main() {
 
 	mux := mux.NewRouter()
 
+	// Teacher routes
 	mux.HandleFunc("/teacher", teacherDelivery.CreateHandler).Methods("POST")
 	mux.HandleFunc("/teacher", teacherDelivery.GetAllHandler).Methods("GET")
 	mux.HandleFunc("/teacher/{id}", teacherDelivery.GetOneHandler).Methods("GET")
+
+	// Student routes
 	mux.HandleFunc("/student", studentDelivery.CreateHandler).Methods("POST")
 	mux.HandleFunc("/student/{id}", studentDelivery.GetOneHandler).Methods("GET")
 	mux.HandleFunc("/student/{id}/group", studentDelivery.GetGroupHandler).Methods("GET")
 	mux.HandleFunc("/student", studentDelivery.GetAllHandler).Methods("GET")
+
+	// Group routes
 	mux.HandleFunc("/group", groupDelivery.CreateHandler).Methods("POST")
 	mux.HandleFunc("/group/{id}", groupDelivery.GetOneHandler).Methods("GET")
 	mux.HandleFunc("/group", groupDelivery.GetAllHandler).Methods("GET")
