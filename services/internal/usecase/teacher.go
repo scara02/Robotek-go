@@ -7,7 +7,8 @@ import (
 
 type Teacher interface {
 	Create(fullName, email, password, phoneNumber string) (int, error)
-	Get(id int) (*domain.Teacher, error)
+	GetOne(id int) (*domain.Teacher, error)
+	GetAll() (*[]domain.Teacher, error)
 }
 
 type TeacherUseCase struct {
@@ -36,11 +37,20 @@ func (uc *TeacherUseCase) Create(fullName, email, password, phoneNumber string) 
 	return id, nil
 }
 
-func (uc *TeacherUseCase) Get(id int) (*domain.Teacher, error) {
-	teacher, err := uc.teacherRepo.GetByID(id)
+func (uc *TeacherUseCase) GetOne(id int) (*domain.Teacher, error) {
+	teacher, err := uc.teacherRepo.GetOne(id)
 	if err != nil {
 		return nil, err
 	}
 
 	return &teacher, nil
+}
+
+func (uc *TeacherUseCase) GetAll() (*[]domain.Teacher, error) {
+	teachers, err := uc.teacherRepo.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	return &teachers, nil
 }

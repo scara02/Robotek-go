@@ -31,7 +31,7 @@ func (r *TeacherRepo) Create(t *domain.Teacher) (int, error) {
 	return teacherID, nil
 }
 
-func (r *TeacherRepo) GetByID(id int) (domain.Teacher, error) {
+func (r *TeacherRepo) GetOne(id int) (domain.Teacher, error) {
 	stmt := `SELECT ID, FullName, Email, Password, PhoneNumber
 	FROM teachers
 	WHERE ID = $1`
@@ -40,8 +40,37 @@ func (r *TeacherRepo) GetByID(id int) (domain.Teacher, error) {
 	err := r.db.QueryRow(stmt, id).Scan(&teacher.ID, &teacher.FullName, &teacher.Email, &teacher.Password, &teacher.PhoneNumber)
 
 	if err != nil {
-        return domain.Teacher{}, err
-    }
+		return domain.Teacher{}, err
+	}
 
-    return teacher, nil
+	return teacher, nil
+}
+
+func (r *TeacherRepo) GetAll() ([]domain.Teacher, error) {
+	stmt := `SELECT ID, FullName, Email, Password, PhoneNumber
+	FROM teachers`
+
+	var teachers []domain.Teacher
+
+	rows, err := r.db.Query(stmt)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var teacher domain.Teacher
+		err := rows.Scan(&teacher.ID, &teacher.FullName, &teacher.Email, &teacher.Password, &teacher.PhoneNumber)
+		if err != nil {
+			return nil, err
+		}
+		teachers = append(teachers, teacher)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return teachers, nil
 }

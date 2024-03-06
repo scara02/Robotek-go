@@ -11,25 +11,25 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type TeacherDelivery struct {
-	teacherUseCase usecase.Teacher
+type GroupDelivery struct {
+	groupUseCase usecase.Group
 }
 
-func NewTeacherDelivery(teacherUseCase usecase.Teacher) *TeacherDelivery {
-	return &TeacherDelivery{
-		teacherUseCase: teacherUseCase,
+func NewGroupDelivery(groupUseCase usecase.Group) *GroupDelivery {
+	return &GroupDelivery{
+		groupUseCase: groupUseCase,
 	}
 }
 
-func (d *TeacherDelivery) CreateHandler(w http.ResponseWriter, r *http.Request) {
-	var t domain.Teacher
+func (d *GroupDelivery) CreateHandler(w http.ResponseWriter, r *http.Request) {
+	var g domain.Group
 
-	if err := json.NewDecoder(r.Body).Decode(&t); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&g); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	id, err := d.teacherUseCase.Create(t.FullName, t.Email, t.Password, t.PhoneNumber)
+	id, err := d.groupUseCase.Create(g.GroupName)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -39,7 +39,7 @@ func (d *TeacherDelivery) CreateHandler(w http.ResponseWriter, r *http.Request) 
 	w.Write([]byte(strconv.Itoa(id)))
 }
 
-func (d *TeacherDelivery) GetOneHandler(w http.ResponseWriter, r *http.Request) {
+func (d *GroupDelivery) GetOneHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(mux.Vars(r)["id"])
 
 	if err != nil {
@@ -47,13 +47,13 @@ func (d *TeacherDelivery) GetOneHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	teacher, err := d.teacherUseCase.GetOne(id)
+	group, err := d.groupUseCase.GetOne(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	teacherJSON, err := json.Marshal(teacher)
+	groupJSON, err := json.Marshal(group)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -62,17 +62,17 @@ func (d *TeacherDelivery) GetOneHandler(w http.ResponseWriter, r *http.Request) 
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(string(teacherJSON)))
+	w.Write([]byte(string(groupJSON)))
 }
 
-func (d *TeacherDelivery) GetAllHandler(w http.ResponseWriter, r *http.Request) {
-	teachers, err := d.teacherUseCase.GetAll()
+func (d *GroupDelivery) GetAllHandler(w http.ResponseWriter, r *http.Request) {
+	groups, err := d.groupUseCase.GetAll()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	teachersJSON, err := json.Marshal(teachers)
+	groupsJSON, err := json.Marshal(groups)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -81,5 +81,5 @@ func (d *TeacherDelivery) GetAllHandler(w http.ResponseWriter, r *http.Request) 
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(string(teachersJSON)))
+	w.Write([]byte(string(groupsJSON)))
 }
