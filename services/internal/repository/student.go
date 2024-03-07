@@ -18,12 +18,22 @@ func NewStudentRepo(db *sql.DB) *StudentRepo {
 }
 
 func (r *StudentRepo) Create(s *domain.Student) (int, error) {
-	stmt := `INSERT INTO students (fullName, email, password, phoneNumber, groupID)
-		VALUES ($1, $2, $3, $4, $5)
+	stmt := `INSERT INTO users (fullName, email, password, phoneNumber, role)
+		VALUES ($1, $2, $3, $4, 'student')
 		RETURNING ID`
 
 	var studentID int
-	err := r.db.QueryRow(stmt, s.FullName, s.Email, s.Password, s.PhoneNumber, s.GroupID).Scan(&studentID)
+	err := r.db.QueryRow(stmt, s.FullName, s.Email, s.Password, s.PhoneNumber).Scan(&studentID)
+	
+	if err != nil {
+		return 0, fmt.Errorf("error executing SQL statement: %v", err)
+	}
+
+	stmt = `INSERT INTO student_group (studentID, groupID)
+	VALUES ($1, $2)`
+
+	_, err = r.db.Exec(stmt, studentID, s.GroupID)
+
 	if err != nil {
 		return 0, fmt.Errorf("error executing SQL statement: %v", err)
 	}
@@ -32,9 +42,10 @@ func (r *StudentRepo) Create(s *domain.Student) (int, error) {
 }
 
 func (r *StudentRepo) GetOne(id int) (domain.Student, error) {
-	stmt := `SELECT ID, FullName, Email, Password, PhoneNumber, GroupID
-	FROM students
-	WHERE ID = $1`
+	stmt := `SELECT u.ID, u.FullName, u.Email, u.Password, u.PhoneNumber, s.GroupID
+	FROM users u
+	JOIN student_group s on u.id=s.studentID
+	WHERE u.ID = $1`
 
 	var student domain.Student
 	err := r.db.QueryRow(stmt, id).Scan(&student.ID, &student.FullName, &student.Email, &student.Password, &student.PhoneNumber, &student.GroupID)
@@ -47,8 +58,9 @@ func (r *StudentRepo) GetOne(id int) (domain.Student, error) {
 }
 
 func (r *StudentRepo) GetAll() ([]domain.Student, error) {
-	stmt := `SELECT ID, FullName, Email, Password, PhoneNumber, GroupID
-	FROM students`
+	stmt := `SELECT u.ID, u.FullName, u.Email, u.Password, u.PhoneNumber, s.GroupID
+	FROM users u
+	JOIN student_group s ON u.id=s.studentID`
 
 	var students []domain.Student
 
@@ -61,10 +73,12 @@ func (r *StudentRepo) GetAll() ([]domain.Student, error) {
 
 	for rows.Next() {
 		var student domain.Student
+
 		err := rows.Scan(&student.ID, &student.FullName, &student.Email, &student.Password, &student.PhoneNumber, &student.GroupID)
 		if err != nil {
 			return nil, err
 		}
+
 		students = append(students, student)
 	}
 
@@ -76,9 +90,10 @@ func (r *StudentRepo) GetAll() ([]domain.Student, error) {
 }
 
 func (r *StudentRepo) GetGroup(id int) (domain.Group, error) {
-	stmt := `SELECT ID, GroupName
-	FROM groups
-	WHERE ID = $1`
+	stmt := `SELECT g.ID, g.GroupName
+	FROM student_group s
+	JOIN groups g ON s.groupID=g.id
+	WHERE s.studentID = $1`
 
 	var group domain.Group
 	err := r.db.QueryRow(stmt, id).Scan(&group.ID, &group.GroupName)

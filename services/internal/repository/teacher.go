@@ -18,8 +18,8 @@ func NewTeacherRepo(db *sql.DB) *TeacherRepo {
 }
 
 func (r *TeacherRepo) Create(t *domain.Teacher) (int, error) {
-	stmt := `INSERT INTO teachers (fullName, email, password, phoneNumber)
-		VALUES ($1, $2, $3, $4)
+	stmt := `INSERT INTO users (fullName, email, password, phoneNumber, role)
+		VALUES ($1, $2, $3, $4, 'teacher')
 		RETURNING ID`
 
 	var teacherID int
@@ -32,15 +32,20 @@ func (r *TeacherRepo) Create(t *domain.Teacher) (int, error) {
 }
 
 func (r *TeacherRepo) GetOne(id int) (domain.Teacher, error) {
-	stmt := `SELECT ID, FullName, Email, Password, PhoneNumber
-	FROM teachers
+	stmt := `SELECT ID, FullName, Email, Password, PhoneNumber, role
+	FROM users
 	WHERE ID = $1`
 
 	var teacher domain.Teacher
-	err := r.db.QueryRow(stmt, id).Scan(&teacher.ID, &teacher.FullName, &teacher.Email, &teacher.Password, &teacher.PhoneNumber)
+	var role string
+	err := r.db.QueryRow(stmt, id).Scan(&teacher.ID, &teacher.FullName, &teacher.Email, &teacher.Password, &teacher.PhoneNumber, &role)
 
 	if err != nil {
 		return domain.Teacher{}, err
+	}
+
+	if role != "teacher" {
+		return domain.Teacher{}, fmt.Errorf("teacher with ID %d not found", id)
 	}
 
 	return teacher, nil
@@ -48,7 +53,8 @@ func (r *TeacherRepo) GetOne(id int) (domain.Teacher, error) {
 
 func (r *TeacherRepo) GetAll() ([]domain.Teacher, error) {
 	stmt := `SELECT ID, FullName, Email, Password, PhoneNumber
-	FROM teachers`
+	FROM users
+	WHERE role='teacher'`
 
 	var teachers []domain.Teacher
 
