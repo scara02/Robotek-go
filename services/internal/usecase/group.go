@@ -9,6 +9,7 @@ type Group interface {
 	Create(groupName string) (int, error)
 	GetOne(id int) (*domain.Group, error)
 	GetAll() (*[]domain.Group, error)
+	Delete(id int) (int, error)
 }
 
 type GroupUseCase struct {
@@ -50,4 +51,13 @@ func (uc *GroupUseCase) GetAll() (*[]domain.Group, error) {
 	}
 
 	return &students, nil
+}
+
+func (uc *GroupUseCase) Delete(id int) (int, error) {
+	deletedID, err := uc.groupRepo.Delete(id)
+	if err != nil {
+		return 0, err
+	}
+
+	return deletedID, nil
 }

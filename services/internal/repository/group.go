@@ -74,3 +74,18 @@ func (r *GroupRepo) GetAll() ([]domain.Group, error) {
 
 	return groups, nil
 }
+
+func (r *GroupRepo) Delete(id int) (int, error) {
+	stmt := `DELETE FROM groups
+	WHERE id = $1
+	RETURNING id`
+
+	var deletedID int
+	err := r.db.QueryRow(stmt, id).Scan(&deletedID)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return deletedID, nil
+}

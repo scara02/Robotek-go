@@ -104,3 +104,19 @@ func (r *StudentRepo) GetGroup(id int) (domain.Group, error) {
 
 	return group, nil
 }
+
+
+func (r *StudentRepo) Delete(id int) (int, error) {
+	stmt := `DELETE FROM users
+	WHERE id = $1 AND role = 'student'
+	RETURNING id`
+
+	var deletedID int
+	err := r.db.QueryRow(stmt, id).Scan(&deletedID)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return deletedID, nil
+}

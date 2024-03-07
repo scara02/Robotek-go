@@ -10,6 +10,7 @@ type Student interface {
 	GetOne(id int) (*domain.Student, error)
 	GetAll() (*[]domain.Student, error)
 	GetGroup(id int) (*domain.Group, error)
+	Delete(id int) (int, error)
 }
 
 type StudentUseCase struct {
@@ -49,12 +50,7 @@ func (uc *StudentUseCase) GetOne(id int) (*domain.Student, error) {
 }
 
 func (uc *StudentUseCase) GetGroup(id int) (*domain.Group, error) {
-	student, err := uc.GetOne(id)
-	if err != nil {
-		return nil, err
-	}
-
-	group, err := uc.studentRepo.GetGroup(student.GroupID)
+	group, err := uc.studentRepo.GetGroup(id)
 	if err != nil {
 		return nil, err
 	}
@@ -69,4 +65,13 @@ func (uc *StudentUseCase) GetAll() (*[]domain.Student, error) {
 	}
 
 	return &students, nil
+}
+
+func (uc *StudentUseCase) Delete(id int) (int, error) {
+	deletedID, err := uc.studentRepo.Delete(id)
+	if err != nil {
+		return 0, err
+	}
+
+	return deletedID, nil
 }

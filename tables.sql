@@ -17,12 +17,12 @@ CREATE TABLE student_group (
     studentID int,
     groupID INT,
     PRIMARY KEY (studentID),
-    FOREIGN KEY (studentID) REFERENCES users(id),
+    FOREIGN KEY (studentID) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (groupID) REFERENCES groups(id)
 );
 
 CREATE TABLE teacher_groups (
-    teacherID INT REFERENCES users(id),
+    teacherID INT REFERENCES users(id) ON DELETE CASCADE,
     groupID INT REFERENCES groups(id),
     PRIMARY KEY (teacherID, groupID)
 );

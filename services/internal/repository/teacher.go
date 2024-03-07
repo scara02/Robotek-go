@@ -80,3 +80,59 @@ func (r *TeacherRepo) GetAll() ([]domain.Teacher, error) {
 
 	return teachers, nil
 }
+
+func (r *TeacherRepo) Delete(id int) (int, error) {
+	stmt := `DELETE FROM users
+	WHERE id = $1 AND role = 'teacher'
+	RETURNING id`
+
+	var deletedID int
+	err := r.db.QueryRow(stmt, id).Scan(&deletedID)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return deletedID, nil
+}
+
+func (r *TeacherRepo) AddToGroup(teacherID, groupID int) error {
+	stmt := `INSERT INTO teacher_groups (teacherID, groupID)
+	VALUES ($1, $2)`
+
+	_, err := r.db.Exec(stmt, teacherID, groupID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *TeacherRepo) GetGroups(id int) ([]domain.Group, error) {
+	stmt := `SELECT g.ID, g.GroupName
+	FROM teacher_groups t
+	JOIN groups g ON t.groupID=g.id
+	WHERE t.teacherID = $1`
+
+	rows, err := r.db.Query(stmt, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var groups []domain.Group
+
+	for rows.Next() {
+		var group domain.Group
+		if err := rows.Scan(&group.ID, &group.GroupName); err != nil {
+			return nil, err
+		}
+		groups = append(groups, group)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return groups, nil
+}

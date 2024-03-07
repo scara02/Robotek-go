@@ -9,6 +9,9 @@ type Teacher interface {
 	Create(fullName, email, password, phoneNumber string) (int, error)
 	GetOne(id int) (*domain.Teacher, error)
 	GetAll() (*[]domain.Teacher, error)
+	Delete(id int) (int, error)
+	AddToGroup(teacherID, groupID int) (error)
+	GetGroups(id int) ([]domain.Group, error)
 }
 
 type TeacherUseCase struct {
@@ -53,4 +56,31 @@ func (uc *TeacherUseCase) GetAll() (*[]domain.Teacher, error) {
 	}
 
 	return &teachers, nil
+}
+
+func (uc *TeacherUseCase) Delete(id int) (int, error) {
+	deletedID, err := uc.teacherRepo.Delete(id)
+	if err != nil {
+		return 0, err
+	}
+
+	return deletedID, nil
+}
+
+func (uc *TeacherUseCase) AddToGroup(teacherID, groupID int) (error) {
+	err := uc.teacherRepo.AddToGroup(teacherID, groupID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc *TeacherUseCase) GetGroups(id int) ([]domain.Group, error) {
+	groups, err := uc.teacherRepo.GetGroups(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return groups, nil
 }

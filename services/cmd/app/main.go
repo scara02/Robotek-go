@@ -37,17 +37,22 @@ func main() {
 	mux.HandleFunc("/teacher", teacherDelivery.CreateHandler).Methods("POST")
 	mux.HandleFunc("/teacher", teacherDelivery.GetAllHandler).Methods("GET")
 	mux.HandleFunc("/teacher/{id}", teacherDelivery.GetOneHandler).Methods("GET")
+	mux.HandleFunc("/teacher/{id}", teacherDelivery.DeleteHandler).Methods("DELETE")
+	mux.HandleFunc("/teacher/{teacherID}/group/{groupID}", teacherDelivery.AddToGroupHandler).Methods("POST")
+	mux.HandleFunc("/teacher/{id}/groups", teacherDelivery.GetGroupsHandler).Methods("GET")
 
 	// Student routes
 	mux.HandleFunc("/student", studentDelivery.CreateHandler).Methods("POST")
+	mux.HandleFunc("/student", studentDelivery.GetAllHandler).Methods("GET")
 	mux.HandleFunc("/student/{id}", studentDelivery.GetOneHandler).Methods("GET")
 	mux.HandleFunc("/student/{id}/group", studentDelivery.GetGroupHandler).Methods("GET")
-	mux.HandleFunc("/student", studentDelivery.GetAllHandler).Methods("GET")
+	mux.HandleFunc("/student/{id}", studentDelivery.DeleteHandler).Methods("DELETE")
 
 	// Group routes
 	mux.HandleFunc("/group", groupDelivery.CreateHandler).Methods("POST")
-	mux.HandleFunc("/group/{id}", groupDelivery.GetOneHandler).Methods("GET")
 	mux.HandleFunc("/group", groupDelivery.GetAllHandler).Methods("GET")
+	mux.HandleFunc("/group/{id}", groupDelivery.GetOneHandler).Methods("GET")
+	mux.HandleFunc("/group/{id}", groupDelivery.DeleteHandler).Methods("DELETE")
 
 	log.Print("starting server on :4000")
 
