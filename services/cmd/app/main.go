@@ -30,34 +30,40 @@ func main() {
 	groupRepo := repository.NewGroupRepo(db)
 	groupUseCase := usecase.NewGroupUsecase(*groupRepo)
 	groupDelivery := delivery.NewGroupDelivery(groupUseCase)
+	userRepo := repository.NewUserRepo(db)
+	userUseCase := usecase.NewUserUsecase(*userRepo)
+	userDelivery := delivery.NewUserDelivery(userUseCase)
 
 	mux := mux.NewRouter()
 
+	// Auth routes
+	mux.HandleFunc("/signin", userDelivery.SignIn).Methods("POST")
+
 	// Teacher routes
-	mux.HandleFunc("/teacher", teacherDelivery.CreateHandler).Methods("POST")
-	mux.HandleFunc("/teacher", teacherDelivery.GetAllHandler).Methods("GET")
-	mux.HandleFunc("/teacher/{id}", teacherDelivery.GetOneHandler).Methods("GET")
-	mux.HandleFunc("/teacher/{id}", teacherDelivery.DeleteHandler).Methods("DELETE")
-	mux.HandleFunc("/teacher/{teacherID}/group/{groupID}", teacherDelivery.AddToGroupHandler).Methods("POST")
-	mux.HandleFunc("/teacher/{id}/groups", teacherDelivery.GetGroupsHandler).Methods("GET")
-	mux.HandleFunc("/teacher/{teacherID}/group/{groupID}", teacherDelivery.DeleteGroupHandler).Methods("DELETE")
-	mux.HandleFunc("/teacher/{id}", teacherDelivery.UpdateHandler).Methods("PUT")
+	mux.Handle("/teacher", userDelivery.IsAuthenticated(http.HandlerFunc(teacherDelivery.CreateHandler))).Methods("POST")
+	mux.Handle("/teacher", userDelivery.IsAuthenticated(http.HandlerFunc(teacherDelivery.GetAllHandler))).Methods("GET")
+	mux.Handle("/teacher/{id}", userDelivery.IsAuthenticated(http.HandlerFunc(teacherDelivery.GetOneHandler))).Methods("GET")
+	mux.Handle("/teacher/{id}", userDelivery.IsAuthenticated(http.HandlerFunc(teacherDelivery.DeleteHandler))).Methods("DELETE")
+	mux.Handle("/teacher/{teacherID}/group/{groupID}", userDelivery.IsAuthenticated(http.HandlerFunc(teacherDelivery.AddToGroupHandler))).Methods("POST")
+	mux.Handle("/teacher/{id}/groups", userDelivery.IsAuthenticated(http.HandlerFunc(teacherDelivery.GetGroupsHandler))).Methods("GET")
+	mux.Handle("/teacher/{teacherID}/group/{groupID}", userDelivery.IsAuthenticated(http.HandlerFunc(teacherDelivery.DeleteGroupHandler))).Methods("DELETE")
+	mux.Handle("/teacher/{id}", userDelivery.IsAuthenticated(http.HandlerFunc(teacherDelivery.UpdateHandler))).Methods("PUT")
 
 	// Student routes
-	mux.HandleFunc("/student", studentDelivery.CreateHandler).Methods("POST")
-	mux.HandleFunc("/student", studentDelivery.GetAllHandler).Methods("GET")
-	mux.HandleFunc("/student/{id}", studentDelivery.GetOneHandler).Methods("GET")
-	mux.HandleFunc("/student/{id}/group", studentDelivery.GetGroupHandler).Methods("GET")
-	mux.HandleFunc("/student/{id}", studentDelivery.DeleteHandler).Methods("DELETE")
-	mux.HandleFunc("/student/{studentID}/group/{groupID}", studentDelivery.ChangeGroupHandler).Methods("PUT")
-	mux.HandleFunc("/student/{id}", studentDelivery.UpdateHandler).Methods("PUT")
+	mux.Handle("/student", userDelivery.IsAuthenticated(http.HandlerFunc(studentDelivery.CreateHandler))).Methods("POST")
+	mux.Handle("/student", userDelivery.IsAuthenticated(http.HandlerFunc(studentDelivery.GetAllHandler))).Methods("GET")
+	mux.Handle("/student/{id}", userDelivery.IsAuthenticated(http.HandlerFunc(studentDelivery.GetOneHandler))).Methods("GET")
+	mux.Handle("/student/{id}/group", userDelivery.IsAuthenticated(http.HandlerFunc(studentDelivery.GetGroupHandler))).Methods("GET")
+	mux.Handle("/student/{id}", userDelivery.IsAuthenticated(http.HandlerFunc(studentDelivery.DeleteHandler))).Methods("DELETE")
+	mux.Handle("/student/{studentID}/group/{groupID}", userDelivery.IsAuthenticated(http.HandlerFunc(studentDelivery.ChangeGroupHandler))).Methods("PUT")
+	mux.Handle("/student/{id}", userDelivery.IsAuthenticated(http.HandlerFunc(studentDelivery.UpdateHandler))).Methods("PUT")
 
 	// Group routes
-	mux.HandleFunc("/group", groupDelivery.CreateHandler).Methods("POST")
-	mux.HandleFunc("/group", groupDelivery.GetAllHandler).Methods("GET")
-	mux.HandleFunc("/group/{id}", groupDelivery.GetOneHandler).Methods("GET")
-	mux.HandleFunc("/group/{id}", groupDelivery.DeleteHandler).Methods("DELETE")
-	mux.HandleFunc("/group/{id}", groupDelivery.UpdateHandler).Methods("PUT")
+	mux.Handle("/group", userDelivery.IsAuthenticated(http.HandlerFunc(groupDelivery.CreateHandler))).Methods("POST")
+	mux.Handle("/group", userDelivery.IsAuthenticated(http.HandlerFunc(groupDelivery.GetAllHandler))).Methods("GET")
+	mux.Handle("/group/{id}", userDelivery.IsAuthenticated(http.HandlerFunc(groupDelivery.GetOneHandler))).Methods("GET")
+	mux.Handle("/group/{id}", userDelivery.IsAuthenticated(http.HandlerFunc(groupDelivery.DeleteHandler))).Methods("DELETE")
+	mux.Handle("/group/{id}", userDelivery.IsAuthenticated(http.HandlerFunc(groupDelivery.UpdateHandler))).Methods("PUT")
 
 	log.Print("starting server on :4000")
 
