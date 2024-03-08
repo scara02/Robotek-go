@@ -12,6 +12,8 @@ type Teacher interface {
 	Delete(id int) (int, error)
 	AddToGroup(teacherID, groupID int) (error)
 	GetGroups(id int) ([]domain.Group, error)
+	Update(id int, updatedTeacher domain.Teacher) error
+	DeleteGroup(teacherID, groupID int) error
 }
 
 type TeacherUseCase struct {
@@ -83,4 +85,22 @@ func (uc *TeacherUseCase) GetGroups(id int) ([]domain.Group, error) {
 	}
 
 	return groups, nil
+}
+
+func (uc *TeacherUseCase) DeleteGroup(teacherID, groupID int) error {
+	err := uc.teacherRepo.DeleteGroup(teacherID, groupID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc *TeacherUseCase) Update(id int, updatedTeacher domain.Teacher) error {
+	err := uc.teacherRepo.Update(id, &updatedTeacher)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

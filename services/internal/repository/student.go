@@ -120,3 +120,48 @@ func (r *StudentRepo) Delete(id int) (int, error) {
 
 	return deletedID, nil
 }
+
+func (r *StudentRepo) ChangeGroup(studentID, groupID int) error {
+	stmt := `UPDATE student_group
+	SET groupID = $1
+	WHERE studentID = $2`
+
+	_, err := r.db.Exec(stmt, groupID, studentID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *StudentRepo) Update(id int, updatedStudent *domain.Student) error {
+	stmtCheckRole := `SELECT role 
+	FROM users 
+	WHERE ID=$1`
+
+	var role string
+
+	err := r.db.QueryRow(stmtCheckRole, id).Scan(&role)
+	if err != nil {
+		return err
+	}
+
+	if role != "student" {
+		return fmt.Errorf("user with ID %d is not a student", id)
+	}
+
+	stmt := `UPDATE users
+	SET 
+	FullName=COALESCE(NULLIF($2, ''), FullName), 
+	Email=COALESCE(NULLIF($3, ''), Email), 
+	Password=COALESCE(NULLIF($4, ''), Password), 
+	PhoneNumber=COALESCE(NULLIF($5, ''), PhoneNumber)
+	WHERE ID=$1`
+
+	_, err = r.db.Exec(stmt, id, updatedStudent.FullName, updatedStudent.Email, updatedStudent.Password, updatedStudent.PhoneNumber)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

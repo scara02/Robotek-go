@@ -11,6 +11,8 @@ type Student interface {
 	GetAll() (*[]domain.Student, error)
 	GetGroup(id int) (*domain.Group, error)
 	Delete(id int) (int, error)
+	ChangeGroup(studentID, groupID int) error
+	Update(id int, updatedStudent domain.Student) error
 }
 
 type StudentUseCase struct {
@@ -74,4 +76,29 @@ func (uc *StudentUseCase) Delete(id int) (int, error) {
 	}
 
 	return deletedID, nil
+}
+
+func (uc *StudentUseCase) ChangeGroup(studentID, groupID int) error {
+	err := uc.studentRepo.ChangeGroup(studentID, groupID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc *StudentUseCase) Update(id int, updatedStudent domain.Student) error {
+	err := uc.studentRepo.Update(id, &updatedStudent)
+	if err != nil {
+		return err
+	}
+
+	if updatedStudent.GroupID != 0 {
+		err = uc.studentRepo.ChangeGroup(id, updatedStudent.GroupID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

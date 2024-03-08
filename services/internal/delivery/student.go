@@ -136,3 +136,50 @@ func (d *StudentDelivery) DeleteHandler(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(string(idJSON)))
 }
+
+func (d *StudentDelivery) ChangeGroupHandler(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	studentID, err := strconv.Atoi(params["studentID"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	groupID, err := strconv.Atoi(params["groupID"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = d.studentUseCase.ChangeGroup(studentID, groupID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (d *StudentDelivery) UpdateHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var updatedStudent domain.Student
+	if err := json.NewDecoder(r.Body).Decode(&updatedStudent); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = d.studentUseCase.Update(id, updatedStudent)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+}

@@ -10,6 +10,7 @@ type Group interface {
 	GetOne(id int) (*domain.Group, error)
 	GetAll() (*[]domain.Group, error)
 	Delete(id int) (int, error)
+	Update(id int, updatedGroup domain.Group) error
 }
 
 type GroupUseCase struct {
@@ -60,4 +61,13 @@ func (uc *GroupUseCase) Delete(id int) (int, error) {
 	}
 
 	return deletedID, nil
+}
+
+func (uc *GroupUseCase)	Update(id int, updatedGroup domain.Group) error {
+	err := uc.groupRepo.Update(id, &updatedGroup)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

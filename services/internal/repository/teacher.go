@@ -136,3 +136,47 @@ func (r *TeacherRepo) GetGroups(id int) ([]domain.Group, error) {
 
 	return groups, nil
 }
+
+func (r *TeacherRepo) DeleteGroup(teacherID, groupID int) error {
+	stmt := `DELETE FROM teacher_groups
+	WHERE teacherID = $1 and groupID = $2`
+
+	_, err := r.db.Exec(stmt, teacherID, groupID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *TeacherRepo) Update(id int, updatedTeacher *domain.Teacher) error {
+	stmtCheckRole := `SELECT role 
+	FROM users 
+	WHERE ID=$1`
+
+	var role string
+
+	err := r.db.QueryRow(stmtCheckRole, id).Scan(&role)
+	if err != nil {
+		return err
+	}
+
+	if role != "teacher" {
+		return fmt.Errorf("user with ID %d is not a teacher", id)
+	}
+
+	stmt := `UPDATE users
+	SET 
+	FullName=COALESCE(NULLIF($2, ''), FullName), 
+	Email=COALESCE(NULLIF($3, ''), Email), 
+	Password=COALESCE(NULLIF($4, ''), Password), 
+	PhoneNumber=COALESCE(NULLIF($5, ''), PhoneNumber)
+	WHERE ID=$1`
+
+	_, err = r.db.Exec(stmt, id, updatedTeacher.FullName, updatedTeacher.Email, updatedTeacher.Password, updatedTeacher.PhoneNumber)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

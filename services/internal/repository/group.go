@@ -89,3 +89,17 @@ func (r *GroupRepo) Delete(id int) (int, error) {
 
 	return deletedID, nil
 }
+
+func (r *GroupRepo) Update(id int, updatedGroup *domain.Group) error {
+	stmt := `UPDATE groups
+	SET GroupName=COALESCE(NULLIF($2, ''), GroupName)
+	WHERE id = $1`
+
+	_, err := r.db.Exec(stmt, id, updatedGroup.GroupName)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
